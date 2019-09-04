@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> implements OnNoteItemClickListner {
+public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> implements OnNoteItemClickListner { //에러
 
 
 ArrayList<Note> items = new ArrayList<Note>();
@@ -30,7 +30,7 @@ ArrayList<Note> items = new ArrayList<Note>();
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-        View itemView = inflater.inflate(R.layout.note_item, viewGroup, false);
+        View itemView = inflater.inflate(R.layout.note_item, viewGroup, false);// 에러!!
 
         return new ViewHolder(itemView, this, layoutType);
 

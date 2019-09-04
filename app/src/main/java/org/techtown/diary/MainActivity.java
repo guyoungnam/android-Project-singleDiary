@@ -60,20 +60,17 @@ public class MainActivity extends AppCompatActivity implements OnTabItemSelected
                 });
 
     }
-    public void onTabSelected(int position){
-        if(position == 0){
-            bottomNavigation.setSelectedItemId(R.id.tab1);
-        }else if(position ==1){
-            bottomNavigation.setSelectedItemId(R.id.tab2);
-        }else if(position ==2){
-            bottomNavigation.setSelectedItemId(R.id.tab3);
-        }
 
-
-    }
 
     @Override
     public void onTableSelected(int position) {
+        if (position == 0) {
+            bottomNavigation.setSelectedItemId(R.id.tab1);
+        } else if (position == 1) {
+            bottomNavigation.setSelectedItemId(R.id.tab2);
+        } else if (position == 2) {
+            bottomNavigation.setSelectedItemId(R.id.tab3);
+        }
 
     }
 }

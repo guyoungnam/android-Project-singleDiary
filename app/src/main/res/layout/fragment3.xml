@@ -102,11 +102,11 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="기분변화"
                     android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:text="기분 변화"/>
+                    android:textStyle="bold" />
 
-                <com.github.mikephil.charting.charts.BarChart
+                <com.github.mikephil.charting.charts.LineChart
                     android:id="@+id/chart3"
                     android:layout_width="250dp"
                     android:layout_height="250dp"
