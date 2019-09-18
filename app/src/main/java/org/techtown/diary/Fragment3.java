@@ -72,7 +72,7 @@ public class Fragment3 extends Fragment {
         chart.setEntryLabelColor(Color.WHITE);
         chart.setEntryLabelTextSize(12f);
 
-        setData1();
+        setData1();   //chart1
 
 
         chart2 = rootView.findViewById(R.id.chart2);
@@ -98,7 +98,7 @@ public class Fragment3 extends Fragment {
 
         chart2.animateXY(1500, 1500);
 
-        setData2();
+        setData2(); //chart2
 
 
         chart3 = rootView.findViewById(R.id.chart3);
