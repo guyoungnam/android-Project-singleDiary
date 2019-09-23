@@ -24,6 +24,7 @@ import org.techtown.diary.data.WeatherResult;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +46,13 @@ public class MainActivity extends AppCompatActivity implements OnTabItemSelected
 
     Location currentLocation;
     GPSListener gpsListener;
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+    SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH시");
+    SimpleDateFormat dateFormat3 = new SimpleDateFormat("MM월 dd일");
+    SimpleDateFormat dateFormat4 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+
 
     int locationCount = 0;
     //위치를 한 번 확인한 후에는 위치 요청을 취소할 수 있도록 위치 젖ㅇ보를 확인하는 횟수
@@ -96,20 +104,20 @@ public class MainActivity extends AppCompatActivity implements OnTabItemSelected
                     }
                 });
 
-        //AutoPermission.Companion.loadAllPermission(this, 101);
+        AutoPermissions.Companion.loadAllPermissions(this, 101);
 
-       // setPicturePath();
+     //   setPicturePath();
 
 
 
 
     }
 
-    //private void setPicturePath() {
+   // private void setPicturePath() {
 
-      //  String sdcardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        //AppConstants.FOLDER_PHOTO = sdcardPath + File.separator + "photo"; //에러 발생
-    //}
+   //     String sdcardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+   //     AppConstants.FOLDER_PHOTO = sdcardPath + File.separator + "photo"; //에러 발생
+   // }
 
 
     @Override
@@ -161,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements OnTabItemSelected
 
         //set current time
         currentDate = new Date();
-        currentDateString = AppConstants.dateFormat3.format(currentDate);
+        currentDateString = dateFormat3.format(currentDate);
         if(fragment2 !=null){
             fragment2.setDateString(currentDateString);
         }
@@ -267,10 +275,13 @@ public class MainActivity extends AppCompatActivity implements OnTabItemSelected
     }
 
     //날씨 확인
+    //GridUtil 객체의 getGrid ( ) 메서드 이용 격자 번호 확인
+
     public void getCurrentWeather() {
 
         //격자 번호를 확인
         Map<String, Double> gridMap = GridUtil.getGrid(currentLocation.getLatitude(), currentLocation.getLongitude());
+
         double gridX = gridMap.get("x");
         double gridY = gridMap.get("y");
         println("x -> " + gridX + ", y -> " + gridY);
@@ -280,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements OnTabItemSelected
     }
 
     //기상청 날씨 서버로 요청을 전송
+
     private void sendLocalWeatherReq(double gridX, double gridY) {
 
         String url = "http://www.kma.go.kr/wid/queryDFS.jsp";
@@ -320,8 +332,8 @@ public class MainActivity extends AppCompatActivity implements OnTabItemSelected
 
                 // 현재 기준 시간
                 try {
-                    Date tmDate = AppConstants.dateFormat.parse(weather.header.tm);
-                    String tmDateText = AppConstants.dateFormat2.format(tmDate);
+                    Date tmDate = dateFormat.parse(weather.header.tm);
+                    String tmDateText = dateFormat2.format(tmDate);
                     println("기준 시간 : " + tmDateText);
 
                     for (int i = 0; i < weather.body.datas.size(); i++) {

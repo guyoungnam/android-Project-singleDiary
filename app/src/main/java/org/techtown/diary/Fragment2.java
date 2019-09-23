@@ -2,11 +2,15 @@ package org.techtown.diary;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +26,7 @@ import com.github.channguyen.rsv.RangeSliderView;
 import java.io.File;
 import java.util.Date;
 
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 public class Fragment2 extends Fragment {
@@ -49,7 +54,7 @@ public class Fragment2 extends Fragment {
     Bitmap resultPhotoBitmap;
 
 
-    // 무슨 작업이지??
+    // 플래그먼트 onAttach 상태
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -65,6 +70,7 @@ public class Fragment2 extends Fragment {
         }
     }
 
+    // 플래그먼트 onDetch 상태
     @Override
     public void onDetach() {
         super.onDetach();
@@ -78,6 +84,8 @@ public class Fragment2 extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        Toast.makeText(context, "onCreateView 호출",Toast.LENGTH_LONG).show();
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment2, container, false);
 
         initUI(rootView);
@@ -88,17 +96,21 @@ public class Fragment2 extends Fragment {
             requestListener.onRequest("getCurrentLocation");
         }
 
+        //applyItem();
+
         return rootView;
     }
 
+
+
     private void initUI(ViewGroup rootView) {
-        
+
         weatherIcon =rootView.findViewById(R.id.weatherIcon);
         dateTextView = rootView.findViewById(R.id.dateTextView);
         locationTextView = rootView.findViewById(R.id.locationTextView);
-        
+
         contentsInput = rootView.findViewById(R.id.contentsInput);
-        pictureImageView = rootView.findViewById(R.id.pictureExistsImageView);
+        pictureImageView = rootView.findViewById(R.id.pictureImageView);
         pictureImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,7 +123,7 @@ public class Fragment2 extends Fragment {
         });
 
 
-        
+
         Button saveButton = rootView.findViewById(R.id.saveButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,6 +168,8 @@ public class Fragment2 extends Fragment {
 
     }
 
+    // 기상청의 현재 날씨 문자열을 받아 아이콘을 설정하는 역할
+
     public void setWeather(String data) {
         if (data != null) {
             if (data.equals("맑음")) {
@@ -180,10 +194,14 @@ public class Fragment2 extends Fragment {
 
     }
 
+    //주소 문자열을 받아 텍스트뷰에 보여주는 역할
+
     public void setAddress(String data) {
         locationTextView.setText(data);
+        Log.i("myTag",data);
     }
 
+    //현재 일자
     public void setDateString(String dateString) {
         dateTextView.setText(dateString);
     }
@@ -199,8 +217,89 @@ public class Fragment2 extends Fragment {
 
         switch (id){
 
+            //case 1
             case AppConstants.CONTENT_PHOTO:
                 builder = new AlertDialog.Builder(context);
+
+                builder.setTitle("사진 메뉴 선택");
+                builder.setSingleChoiceItems(R.array.array_photo, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        selectedPhotoMenu = whichButton;
+
+                    }
+                });
+                builder.setPositiveButton("선택", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        if (selectedPhotoMenu == 0) {
+                            showPhotoCaptureActivity();
+                        } else if (selectedPhotoMenu == 1) {
+                            showPhotoCaptureActivity();
+                        }
+                    }
+                });
+                builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                    }
+                });
+                break;
+
+                //case 2
+
+                case AppConstants.CONTENT_PHOTO_EX:
+                    builder = new AlertDialog.Builder(context);
+
+                    builder.setTitle("사진 메뉴 선택");
+                    builder.setSingleChoiceItems(R.array.array_photo_ex, 0, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            selectedPhotoMenu = whichButton;
+                        }
+                    });
+
+                    builder.setPositiveButton("선택", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if(selectedPhotoMenu == 0){
+                                showPhotoCaptureActivity();
+                            }else if(selectedPhotoMenu ==1){
+                                showPhotoCaptureActivity();
+                            }else if(selectedPhotoMenu ==2){
+                                isPhotoCanceled =true;
+                                isPhotoCapture = false;
+
+                                pictureImageView.setImageResource(R.drawable.picture_128);
+                            }
+                        }
+                    });
+                    builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int whichButton) {
+
+                        }
+                    });
+                    break;
+
+                    default:
+                        break;
+        }
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void showPhotoCatureActivity(){
+        if (file == null){
+            file = createFile();
+        }
+
+        Uri fileUri = FileProvider.getUriForFile(context,"org.techown.diary.fileprovider",file);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+        if(intent.resolveActivity(context.getPackageManager()) != null){
+            startActivityForResult(intent, AppConstants.REQ_PHOTO_CAPTURE);
         }
     }
 
@@ -218,6 +317,45 @@ public class Fragment2 extends Fragment {
         Intent intent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, AppConstants.REQ_PHOTO_SELECTION);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent){
+        super.onActivityResult(requestCode, resultCode,intent);
+
+        if(intent !=null){
+            switch (requestCode){
+                case AppConstants.REQ_PHOTO_CAPTURE:
+                    Log.i(TAG, "onActivityResult() for REQ_PHOTO_CATURE");
+                    Log.i(TAG, "resultCode:" + resultCode);
+
+                    resultPhotoBitmap = decodeSampleBitmapFromResource(file, pictureImageView.getWidth(),
+                            pictureImageView.getHeight());
+                    pictureImageView.setImageBitmap(resultPhotoBitmap);
+
+                    break;
+
+                    case AppConstants.REQ_PHOTO_SELECTION:
+                        Log.i(TAG,"onActivityResult( ) for REQ_PHOTO_SELECTION");
+
+                        Uri selectedImage = intent.getData();
+                        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                        Cursor cursor = context.getContentResolver().query(selectedImage,filePathColumn,null,null,null);
+                        cursor.moveToFirst();
+
+                        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                        String filePath = cursor.getString(columnIndex);
+                        cursor.close();
+
+                        resultPhotoBitmap = decodeSampleBitmapFromResource(new File(filePath),pictureImageView.getWidth(),
+                                pictureImageView.getHeight());
+                        pictureImageView.setImageBitmap(resultPhotoBitmap);
+                        isPhotoCapture = true;
+
+                        break;
+
+            }
+        }
     }
 
     //public void showPhotoSelectionActivity(){}
