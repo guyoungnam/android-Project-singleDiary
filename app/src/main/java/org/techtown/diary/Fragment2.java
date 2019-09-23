@@ -24,6 +24,9 @@ import android.widget.Toast;
 import com.github.channguyen.rsv.RangeSliderView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.util.Date;
 
 import androidx.core.content.FileProvider;
@@ -39,9 +42,9 @@ public class Fragment2 extends Fragment {
 
     ImageView weatherIcon;
     TextView dateTextView;
-    TextView locationTextView;
+    TextView locationTextView; //현재 위치
 
-    EditText contentsInput;
+    EditText contentsInput; //메모글 입력
     ImageView pictureImageView;
 
     boolean isPhotoCapture;
@@ -52,6 +55,15 @@ public class Fragment2 extends Fragment {
 
     File file;
     Bitmap resultPhotoBitmap;
+
+    int mMode = AppConstants.MODE_INSERT;
+    int _id = -1;
+    int weatherIndex = 0;
+
+    RangeSliderView moodSlider;
+    int moodIndex = 2;
+
+    Note item;
 
 
     // 플래그먼트 onAttach 상태
@@ -123,27 +135,39 @@ public class Fragment2 extends Fragment {
         });
 
 
-
+// 저장 버튼
         Button saveButton = rootView.findViewById(R.id.saveButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //구분 , 새로 만드는지 / 수정하는지
+
+                if(mMode == AppConstants.MODE_INSERT) {
+                    saveNote();
+                }else if(mMode == AppConstants.MODE_MODIFY){
+                    modifyNote();
+                }
                 if (listener != null) {
                     listener.onTableSelected(0);
                 }
             }
         });
 
+        //삭제 버튼
         Button deleteButton = rootView.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                deleteNote();
                 if (listener != null) {
                     listener.onTableSelected(0);
                 }
             }
         });
 
+        // 닫기 버튼
         Button closeButton = rootView.findViewById(R.id.closeButton);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,6 +178,8 @@ public class Fragment2 extends Fragment {
             }
 
         });
+
+
 
         RangeSliderView silderView = rootView.findViewById(R.id.sliderView);
         silderView.setOnSlideListener(new RangeSliderView.OnSlideListener() {
@@ -167,6 +193,106 @@ public class Fragment2 extends Fragment {
 
 
     }
+
+
+    //메모 저장
+
+    private void saveNote() {
+
+        String address = locationTextView.getText().toString();
+        String contents = contentsInput.getText().toString();
+
+        String picturePath = savePicture();
+
+        String sql = "insert into " + NoteDatabase.TABLE_NOTE +
+                "(WEATHER, ADDRESS, LOCATION_X, LOCATION_Y, CONTENTS, MOOD, PICTURE) values(" +
+                "'"+ weatherIndex + "', " +
+                "'"+ address + "', " +
+                "'"+ "" + "', " +
+                "'"+ "" + "', " +
+                "'"+ contents + "', " +
+                "'"+ moodIndex + "', " +
+                "'"+ picturePath + "')";
+
+        Log.d(TAG, "sql : " + sql);
+        NoteDatabase database = NoteDatabase.getInstance(context);
+        database.execSQL(sql);
+    }
+
+    private void modifyNote() {
+
+        if(item != null){
+            String address = locationTextView.getText().toString();
+            String contents = contentsInput.getText().toString();
+
+            String picturePath = savePicture();
+
+            // 업데이트
+            String sql = "update " + NoteDatabase.TABLE_NOTE +
+                    " set " +
+                    "   WEATHER = '" + weatherIndex + "'" +
+                    "   ,ADDRESS = '" + address + "'" +
+                    "   ,LOCATION_X = '" + "" + "'" +
+                    "   ,LOCATION_Y = '" + "" + "'" +
+                    "   ,CONTENTS = '" + contents + "'" +
+                    "   ,MOOD = '" + moodIndex + "'" +
+                    "   ,PICTURE = '" + picturePath + "'" +
+                    " where " +
+                    "   _id = " + item._id;
+
+            Log.d(TAG, "sql :"+ sql);
+            NoteDatabase database = NoteDatabase.getInstance(context);
+            database.execSQL(sql);
+        }
+    }
+
+
+    //사진 저장 하기
+
+    private String savePicture() {
+
+        if (resultPhotoBitmap == null){
+            AppConstants.println("No piture to be saved"); //사진없을 때 뜨는 메시지
+            return   "";
+        }
+
+        File photoFolder = new File(AppConstants.FOLDER_PHOTO);
+
+        if(!photoFolder.isDirectory()){
+            Log.d(TAG, "create photo folder:" +photoFolder);
+            photoFolder.mkdir();
+        }
+        String photoFilename = createFilename();
+        String picturePath = photoFolder + File.separator +photoFilename;
+
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(picturePath);
+            resultPhotoBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    return picturePath;
+    }
+
+    private void deleteNote(){
+        AppConstants.println("deleteNote called");
+
+        if(item !=null){
+            String sql = "delete from" + NoteDatabase.TABLE_NOTE +
+                    "where" + "_id = " +item._id;
+
+            Log.d(TAG, "sql:" + sql);
+            NoteDatabase database = NoteDatabase.getInstance(context);
+            database.execSQL(sql);
+        }
+    }
+
+
+
 
     // 기상청의 현재 날씨 문자열을 받아 아이콘을 설정하는 역할
 

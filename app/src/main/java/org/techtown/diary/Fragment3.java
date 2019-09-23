@@ -1,5 +1,7 @@
 package org.techtown.diary;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,13 +28,18 @@ import com.github.mikephil.charting.utils.MPPointF;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import androidx.fragment.app.Fragment;
 
 public class Fragment3 extends Fragment {
+
+ private static final String TAG = "Fragment3";
+ Context context;
 
     PieChart chart;
     BarChart chart2;
@@ -45,8 +52,144 @@ public class Fragment3 extends Fragment {
 
      initUI(rootView);
 
+     loadStatData();
+
      return rootView;
  }
+
+ //세 개의 그래프를 위해 데이터베이스로부터 기분 데이터를 조회한다.
+    private void loadStatData() {
+        NoteDatabase database = NoteDatabase.getInstance(context);
+
+        //기분별 비율
+
+        String sql = "select mood " +
+                "  , count(mood) " +
+                "from " + NoteDatabase.TABLE_NOTE + " " +
+                "where create_date > '" + getMonthBefore(1) + "' " +
+                "  and create_date < '" + getTomorrow() + "' " +
+                "group by mood";
+
+        Cursor cursor = database.rawQuery(sql);
+        int recordCount = cursor.getCount();
+        AppConstants.println("recordCount : " + recordCount);
+
+        HashMap<String, Integer> dataHash1 = new HashMap<String, Integer>();
+        for (int i = 0; i < recordCount; i++) {
+            cursor.moveToNext();
+
+            String moodName = cursor.getString(0);
+            int moodCount = cursor.getInt(1);
+
+            AppConstants.println("#" + i + "->" + moodName + "," + moodCount);
+            dataHash1.put(moodName, moodCount);
+        }
+
+        setData1(dataHash1);
+
+        //요일별 비율
+
+        sql = "select strftime('%w', create_date) " +
+                "  , avg(mood) " +
+                "from " + NoteDatabase.TABLE_NOTE + " " +
+                "where create_date > '" + getMonthBefore(1) + "' " +
+                "  and create_date < '" + getTomorrow() + "' " +
+                "group by strftime('%w', create_date)";
+
+        cursor = database.rawQuery(sql);
+        recordCount = cursor.getCount();
+        AppConstants.println("recordCount : " + recordCount);
+
+        HashMap<String,Integer> dataHash2 = new HashMap<String,Integer>();
+        for (int i = 0; i < recordCount; i++) {
+            cursor.moveToNext();
+
+            String weekDay = cursor.getString(0);
+            int moodCount = cursor.getInt(1);
+
+            AppConstants.println("#" + i + " -> " + weekDay + ", " + moodCount);
+            dataHash2.put(weekDay, moodCount);
+        }
+
+        setData2(dataHash2);
+
+        //기분 변화
+
+        sql = "select strftime('%Y-%m-%d', create_date) " +
+                "  , avg(cast(mood as real)) " +
+                "from " + NoteDatabase.TABLE_NOTE + " " +
+                "where create_date > '" + getDayBefore(7) + "' " +
+                "  and create_date < '" + getTomorrow() + "' " +
+                "group by strftime('%Y-%m-%d', create_date)";
+
+        cursor = database.rawQuery(sql);
+        recordCount = cursor.getCount();
+        AppConstants.println("recordCount : " + recordCount);
+
+        HashMap<String,Integer> recordsHash = new HashMap<String,Integer>();
+        for (int i = 0; i < recordCount; i++) {
+            cursor.moveToNext();
+
+            String monthDate = cursor.getString(0);
+            int moodCount = cursor.getInt(1);
+
+            AppConstants.println("#" + i + " -> " + monthDate + ", " + moodCount);
+            recordsHash.put(monthDate, moodCount);
+        }
+
+        ArrayList<Float> dataKeys3 = new ArrayList<Float>();
+        ArrayList<Integer> dataValues3 = new ArrayList<Integer>();
+
+        Date todayDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(todayDate);
+        cal.add(java.util.Calendar.DAY_OF_MONTH, -7);
+
+        for (int i = 0; i < 7; i++) {
+            cal.add(java.util.Calendar.DAY_OF_MONTH, 1);
+            String monthDate = AppConstants.dateFormat5.format(cal.getTime());
+            Object moodCount = recordsHash.get(monthDate);
+
+            dataKeys3.add((i-6) * 24.0f);
+            if (moodCount == null) {
+                dataValues3.add(0);
+            } else {
+                dataValues3.add((Integer)moodCount);
+            }
+
+            AppConstants.println("#" + i + " -> " + monthDate + ", " + moodCount);
+        }
+
+        setData3(dataKeys3, dataValues3);
+
+    }
+
+    private String getDayBefore(int amount) {
+        Date todayDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(todayDate);
+        cal.add(Calendar.MONTH, (amount * -1));
+        return AppConstants.dateFormat5.format(cal.getTime());
+    }
+
+    private String getTomorrow() {
+
+        Date todayDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(todayDate);
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+
+        return AppConstants.dateFormat5.format(cal.getTime());
+    }
+
+    private String getMonthBefore(int amount) {
+        Date todayDate  = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(todayDate);
+        cal.add(Calendar.MONTH, (amount * -1));
+
+        return AppConstants.dateFormat5.format(cal.getTime());
+    }
 
     private void initUI(ViewGroup rootView) {
 
@@ -54,7 +197,7 @@ public class Fragment3 extends Fragment {
         chart.setUsePercentValues(true);
         chart.getDescription().setEnabled(false);
 
-        chart.setCenterText("기분별 비율");
+        chart.setCenterText(getResources().getString(R.string.graph1_title));
 
         chart.setTransparentCircleColor(Color.WHITE);
         chart.setTransparentCircleAlpha(110);
@@ -72,7 +215,7 @@ public class Fragment3 extends Fragment {
         chart.setEntryLabelColor(Color.WHITE);
         chart.setEntryLabelTextSize(12f);
 
-        setData1();   //chart1
+
 
 
         chart2 = rootView.findViewById(R.id.chart2);
@@ -98,7 +241,7 @@ public class Fragment3 extends Fragment {
 
         chart2.animateXY(1500, 1500);
 
-        setData2(); //chart2
+
 
 
         chart3 = rootView.findViewById(R.id.chart3);
@@ -149,15 +292,30 @@ public class Fragment3 extends Fragment {
         YAxis rightAxis3 = chart3.getAxisRight();
         rightAxis3.setEnabled(false);
 
-        setData3();
+
 
     }
 
-    private void setData1() {
+    private void setData1(HashMap<String, Integer> dataHash1) {
 
         ArrayList<PieEntry> entries = new ArrayList<>();
 
-        entries.add(new PieEntry(20.0f, "",
+        String [] keys = {"0","1","2","3","4"};
+        int [] icons = {R.drawable.smile1_24, R.drawable.smile2_24,R.drawable.smile3_24,R.drawable.smile4_24,R.drawable.smile5_24};
+
+        for (int i = 0; i<keys.length; i++){
+            int value = 0;
+            Integer outValue = dataHash1.get(keys[i]);
+            if(outValue !=null){
+                value = outValue.intValue();
+            }
+
+            if(value >0){
+                entries.add(new PieEntry(value,"",getResources().getDrawable(icons[i])));
+            }
+        }
+
+      /*  entries.add(new PieEntry(20.0f, "",
                 getResources().getDrawable(R.drawable.smile1_24)));
         entries.add(new PieEntry(20.0f, "",
                 getResources().getDrawable(R.drawable.smile2_24)));
@@ -167,8 +325,8 @@ public class Fragment3 extends Fragment {
                 getResources().getDrawable(R.drawable.smile4_24)));
         entries.add(new PieEntry(20.0f, "",
                 getResources().getDrawable(R.drawable.smile5_24)));
-
-        PieDataSet dataSet = new PieDataSet(entries, "기분별 비율");
+*/
+        PieDataSet dataSet = new PieDataSet(entries, getResources().getString(R.string.graph1_title));
 
         dataSet.setDrawIcons(true);
 
@@ -191,7 +349,7 @@ public class Fragment3 extends Fragment {
     }
 
 
-    private void setData2() {
+    private void setData2(HashMap<String, Integer> dataHash2) {
 
         ArrayList<BarEntry> entries = new ArrayList<>();
 
@@ -226,7 +384,7 @@ public class Fragment3 extends Fragment {
 
     }
 
-    private void setData3() {
+    private void setData3(ArrayList<Float> dataKeys3, ArrayList<Integer> dataValues3) {
 
         ArrayList<Entry> values = new ArrayList<>();
         values.add(new Entry(24f, 20.0f));
