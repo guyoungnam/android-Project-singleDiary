@@ -9,7 +9,7 @@ public class Note  {
     String locationY;
     String contents;
     String mood;
-    String piture;
+    String picture;
     String createDateStr;
 
     public int get_id() {
@@ -68,12 +68,12 @@ public class Note  {
         this.mood = mood;
     }
 
-    public String getPiture() {
-        return piture;
+    public String getPicture() {
+        return picture;
     }
 
-    public void setPiture(String piture) {
-        this.piture = piture;
+    public void setPicture(String piture) {
+        this.picture = picture;
     }
 
     public String getCreateDateStr() {
@@ -92,11 +92,13 @@ public class Note  {
         this.locationY = locationY;
         this.contents = contents;
         this.mood = mood;
-        this.piture = piture;
+        this.picture = picture;
         this.createDateStr = createDateStr;
 
 
     }
+
+
 }
 
 

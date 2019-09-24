@@ -47,7 +47,7 @@ public class Fragment2 extends Fragment {
     EditText contentsInput; //메모글 입력
     ImageView pictureImageView;
 
-    boolean isPhotoCapture;
+    boolean isPhotoCaptured;
     boolean isPhotoFileSaved;
     boolean isPhotoCanceled;
 
@@ -126,13 +126,17 @@ public class Fragment2 extends Fragment {
         pictureImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if(isPhotoCanceled || isPhotoFileSaved){
+
                     showDialog(AppConstants.CONTENT_PHOTO_EX);
                 }else{
                     showDialog(AppConstants.CONTENT_PHOTO);
                 }
             }
         });
+
+        moodSlider =rootView.findViewById(R.id.sliderView);
 
 
 // 저장 버튼
@@ -182,119 +186,17 @@ public class Fragment2 extends Fragment {
 
 
         RangeSliderView silderView = rootView.findViewById(R.id.sliderView);
-        silderView.setOnSlideListener(new RangeSliderView.OnSlideListener() {
+        final RangeSliderView.OnSlideListener listener = new RangeSliderView.OnSlideListener() {
             @Override
             public void onSlide(int index) {
-                Toast.makeText(context, "moodIndex changed to" + index, Toast.LENGTH_SHORT).show();
+                AppConstants.println("moodIndex changed to " +index);
             }
-        });
+        };
 
+        silderView.setOnSlideListener(listener);
         silderView.setInitialIndex(2);
 
-
     }
-
-
-    //메모 저장
-
-    private void saveNote() {
-
-        String address = locationTextView.getText().toString();
-        String contents = contentsInput.getText().toString();
-
-        String picturePath = savePicture();
-
-        String sql = "insert into " + NoteDatabase.TABLE_NOTE +
-                "(WEATHER, ADDRESS, LOCATION_X, LOCATION_Y, CONTENTS, MOOD, PICTURE) values(" +
-                "'"+ weatherIndex + "', " +
-                "'"+ address + "', " +
-                "'"+ "" + "', " +
-                "'"+ "" + "', " +
-                "'"+ contents + "', " +
-                "'"+ moodIndex + "', " +
-                "'"+ picturePath + "')";
-
-        Log.d(TAG, "sql : " + sql);
-        NoteDatabase database = NoteDatabase.getInstance(context);
-        database.execSQL(sql);
-    }
-
-    private void modifyNote() {
-
-        if(item != null){
-            String address = locationTextView.getText().toString();
-            String contents = contentsInput.getText().toString();
-
-            String picturePath = savePicture();
-
-            // 업데이트
-            String sql = "update " + NoteDatabase.TABLE_NOTE +
-                    " set " +
-                    "   WEATHER = '" + weatherIndex + "'" +
-                    "   ,ADDRESS = '" + address + "'" +
-                    "   ,LOCATION_X = '" + "" + "'" +
-                    "   ,LOCATION_Y = '" + "" + "'" +
-                    "   ,CONTENTS = '" + contents + "'" +
-                    "   ,MOOD = '" + moodIndex + "'" +
-                    "   ,PICTURE = '" + picturePath + "'" +
-                    " where " +
-                    "   _id = " + item._id;
-
-            Log.d(TAG, "sql :"+ sql);
-            NoteDatabase database = NoteDatabase.getInstance(context);
-            database.execSQL(sql);
-        }
-    }
-
-
-    //사진 저장 하기
-
-    private String savePicture() {
-
-        if (resultPhotoBitmap == null){
-            AppConstants.println("No piture to be saved"); //사진없을 때 뜨는 메시지
-            return   "";
-        }
-
-        File photoFolder = new File(AppConstants.FOLDER_PHOTO);
-
-        if(!photoFolder.isDirectory()){
-            Log.d(TAG, "create photo folder:" +photoFolder);
-            photoFolder.mkdir();
-        }
-        String photoFilename = createFilename();
-        String picturePath = photoFolder + File.separator +photoFilename;
-
-        FileOutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(picturePath);
-            resultPhotoBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-            outputStream.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    return picturePath;
-    }
-
-    private void deleteNote(){
-        AppConstants.println("deleteNote called");
-
-        if(item !=null){
-            String sql = "delete from" + NoteDatabase.TABLE_NOTE +
-                    "where" + "_id = " +item._id;
-
-            Log.d(TAG, "sql:" + sql);
-            NoteDatabase database = NoteDatabase.getInstance(context);
-            database.execSQL(sql);
-        }
-    }
-
-
-
-
-    // 기상청의 현재 날씨 문자열을 받아 아이콘을 설정하는 역할
 
     public void setWeather(String data) {
         if (data != null) {
@@ -320,6 +222,34 @@ public class Fragment2 extends Fragment {
 
     }
 
+    public void setWeatherIndex(int index) {
+        if (index == 0) {
+            weatherIcon.setImageResource(R.drawable.weather_1);
+            weatherIndex = 0;
+        } else if (index == 1) {
+            weatherIcon.setImageResource(R.drawable.weather_2);
+            weatherIndex = 1;
+        } else if (index == 2) {
+            weatherIcon.setImageResource(R.drawable.weather_3);
+            weatherIndex = 2;
+        } else if (index == 3) {
+            weatherIcon.setImageResource(R.drawable.weather_4);
+            weatherIndex = 3;
+        } else if (index == 4) {
+            weatherIcon.setImageResource(R.drawable.weather_5);
+            weatherIndex = 4;
+        } else if (index == 5) {
+            weatherIcon.setImageResource(R.drawable.weather_6);
+            weatherIndex = 5;
+        } else if (index == 6) {
+            weatherIcon.setImageResource(R.drawable.weather_7);
+            weatherIndex = 6;
+        } else {
+            Log.d("Fragment2", "Unknown weather index : " + index);
+        }
+
+    }
+
     //주소 문자열을 받아 텍스트뷰에 보여주는 역할
 
     public void setAddress(String data) {
@@ -332,10 +262,65 @@ public class Fragment2 extends Fragment {
         dateTextView.setText(dateString);
     }
 
-    public void showPhotoCaptureActivity(){
-        if (file == null){
-            file = createFile();
+    public void setContents(String data) {
+        contentsInput.setText(data);
+    }
+
+    public void setPicture(String picturePath, int sampleSize) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = sampleSize;
+        resultPhotoBitmap = BitmapFactory.decodeFile(picturePath, options);
+
+        pictureImageView.setImageBitmap(resultPhotoBitmap);
+    }
+
+    public void setMood(String mood) {
+        try {
+            moodIndex = Integer.parseInt(mood);
+            moodSlider.setInitialIndex(moodIndex);
+        } catch(Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    public void setItem(Note item) {
+        this.item = item;
+    }
+
+    public void applyItem() {
+        AppConstants.println("applyItem called.");
+
+        if (item != null) {
+            mMode = AppConstants.MODE_MODIFY;
+
+            setWeatherIndex(Integer.parseInt(item.getWeather()));
+            setAddress(item.getAddress());
+            setDateString(item.getCreateDateStr());
+            setContents(item.getContents());
+
+            String picturePath = item.getPicture();
+            if (picturePath == null || picturePath.equals("")) {
+                pictureImageView.setImageResource(R.drawable.noimagefound);
+            } else {
+                setPicture(item.getPicture(), 1);
+            }
+
+            setMood(item.getMood());
+        } else {
+            mMode = AppConstants.MODE_INSERT;
+
+            setWeatherIndex(0);
+            setAddress("");
+
+            Date currentDate = new Date();
+            String currentDateString = AppConstants.dateFormat3.format(currentDate);
+            setDateString(currentDateString);
+
+            contentsInput.setText("");
+            pictureImageView.setImageResource(R.drawable.noimagefound);
+            setMood("2");
+        }
+
     }
 
     public void showDialog(int id){
@@ -373,66 +358,67 @@ public class Fragment2 extends Fragment {
                 });
                 break;
 
-                //case 2
+            //case 2
 
-                case AppConstants.CONTENT_PHOTO_EX:
-                    builder = new AlertDialog.Builder(context);
+            case AppConstants.CONTENT_PHOTO_EX:
+                builder = new AlertDialog.Builder(context);
 
-                    builder.setTitle("사진 메뉴 선택");
-                    builder.setSingleChoiceItems(R.array.array_photo_ex, 0, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            selectedPhotoMenu = whichButton;
+                builder.setTitle("사진 메뉴 선택");
+                builder.setSingleChoiceItems(R.array.array_photo_ex, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        selectedPhotoMenu = whichButton;
+                    }
+                });
+
+                builder.setPositiveButton("선택", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(selectedPhotoMenu == 0){
+                            showPhotoCaptureActivity();
+                        }else if(selectedPhotoMenu ==1){
+                            showPhotoCaptureActivity();
+                        }else if(selectedPhotoMenu ==2){
+                            isPhotoCanceled =true;
+                            isPhotoCaptured = false;
+
+                            pictureImageView.setImageResource(R.drawable.picture_128);
                         }
-                    });
+                    }
+                });
+                builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
 
-                    builder.setPositiveButton("선택", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if(selectedPhotoMenu == 0){
-                                showPhotoCaptureActivity();
-                            }else if(selectedPhotoMenu ==1){
-                                showPhotoCaptureActivity();
-                            }else if(selectedPhotoMenu ==2){
-                                isPhotoCanceled =true;
-                                isPhotoCapture = false;
+                    }
+                });
+                break;
 
-                                pictureImageView.setImageResource(R.drawable.picture_128);
-                            }
-                        }
-                    });
-                    builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int whichButton) {
-
-                        }
-                    });
-                    break;
-
-                    default:
-                        break;
+            default:
+                break;
         }
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
-    public void showPhotoCatureActivity(){
-        if (file == null){
+
+    public void showPhotoCaptureActivity() {
+        if (file == null) {
             file = createFile();
         }
 
-        Uri fileUri = FileProvider.getUriForFile(context,"org.techown.diary.fileprovider",file);
+        Uri fileUri = FileProvider.getUriForFile(context,"org.techtown.diary.fileprovider", file);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-        if(intent.resolveActivity(context.getPackageManager()) != null){
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
             startActivityForResult(intent, AppConstants.REQ_PHOTO_CAPTURE);
         }
     }
 
 
-    private File createFile() {
 
-        String filename = "capture.jsp";
+    private File createFile() {
+        String filename = "capture.jpg";
         File storageDir = Environment.getExternalStorageDirectory();
         File outFile = new File(storageDir, filename);
 
@@ -445,50 +431,49 @@ public class Fragment2 extends Fragment {
         startActivityForResult(intent, AppConstants.REQ_PHOTO_SELECTION);
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent){
-        super.onActivityResult(requestCode, resultCode,intent);
+    /**
+     * 다른 액티비티로부터의 응답 처리
+     */
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
 
-        if(intent !=null){
-            switch (requestCode){
-                case AppConstants.REQ_PHOTO_CAPTURE:
-                    Log.i(TAG, "onActivityResult() for REQ_PHOTO_CATURE");
-                    Log.i(TAG, "resultCode:" + resultCode);
+        if (intent != null) {
+            switch (requestCode) {
+                case AppConstants.REQ_PHOTO_CAPTURE:  // 사진 찍는 경우
+                    Log.d(TAG, "onActivityResult() for REQ_PHOTO_CAPTURE.");
 
-                    resultPhotoBitmap = decodeSampleBitmapFromResource(file, pictureImageView.getWidth(),
-                            pictureImageView.getHeight());
+                    Log.d(TAG, "resultCode : " + resultCode);
+
+                    //setPicture(file.getAbsolutePath(), 8);
+                    resultPhotoBitmap = decodeSampledBitmapFromResource(file, pictureImageView.getWidth(), pictureImageView.getHeight());
                     pictureImageView.setImageBitmap(resultPhotoBitmap);
 
                     break;
 
-                    case AppConstants.REQ_PHOTO_SELECTION:
-                        Log.i(TAG,"onActivityResult( ) for REQ_PHOTO_SELECTION");
+                case AppConstants.REQ_PHOTO_SELECTION:  // 사진을 앨범에서 선택하는 경우
+                    Log.d(TAG, "onActivityResult() for REQ_PHOTO_SELECTION.");
 
-                        Uri selectedImage = intent.getData();
-                        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                    Uri selectedImage = intent.getData();
+                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-                        Cursor cursor = context.getContentResolver().query(selectedImage,filePathColumn,null,null,null);
-                        cursor.moveToFirst();
+                    Cursor cursor = context.getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+                    cursor.moveToFirst();
 
-                        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                        String filePath = cursor.getString(columnIndex);
-                        cursor.close();
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                    String filePath = cursor.getString(columnIndex);
+                    cursor.close();
 
-                        resultPhotoBitmap = decodeSampleBitmapFromResource(new File(filePath),pictureImageView.getWidth(),
-                                pictureImageView.getHeight());
-                        pictureImageView.setImageBitmap(resultPhotoBitmap);
-                        isPhotoCapture = true;
+                    resultPhotoBitmap = decodeSampledBitmapFromResource(new File(filePath), pictureImageView.getWidth(), pictureImageView.getHeight());
+                    pictureImageView.setImageBitmap(resultPhotoBitmap);
+                    isPhotoCaptured = true;
 
-                        break;
+                    break;
 
             }
         }
     }
 
-    //public void showPhotoSelectionActivity(){}
-
-
-
-    public static Bitmap decodeSampleBitmapFromResource(File res, int reqWidth, int reqHeight){
+    public static Bitmap decodeSampledBitmapFromResource(File res, int reqWidth, int reqHeight) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -502,14 +487,10 @@ public class Fragment2 extends Fragment {
         options.inJustDecodeBounds = false;
 
         return BitmapFactory.decodeFile(res.getAbsolutePath(),options);
-
-
-
     }
 
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight){
-
-       // Raw height and width of image
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
         int inSampleSize = 1;
@@ -528,19 +509,117 @@ public class Fragment2 extends Fragment {
         }
 
         return inSampleSize;
-
-
-
     }
 
-    private String createFilename(){
 
+    private String createFilename() {
         Date curDate = new Date();
         String curDateStr = String.valueOf(curDate.getTime());
 
         return curDateStr;
+    }
+
+    private String savePicture() {
+        if (resultPhotoBitmap == null) {
+            AppConstants.println("No picture to be saved.");
+            return "";
+        }
+
+        File photoFolder = new File(AppConstants.FOLDER_PHOTO);
+
+        if(!photoFolder.isDirectory()) {
+            Log.d(TAG, "creating photo folder : " + photoFolder);
+            photoFolder.mkdirs();
+        }
+
+        String photoFilename = createFilename();
+        String picturePath = photoFolder + File.separator + photoFilename;
+
+        try {
+            FileOutputStream outstream = new FileOutputStream(picturePath);
+            resultPhotoBitmap.compress(Bitmap.CompressFormat.PNG, 100, outstream);
+            outstream.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return picturePath;
+    }
+
+    /**
+     * 데이터베이스 레코드 추가
+     */
+    private void saveNote() {
+        String address = locationTextView.getText().toString();
+        String contents = contentsInput.getText().toString();
+
+        String picturePath = savePicture();
+
+        String sql = "insert into " + NoteDatabase.TABLE_NOTE +
+                "(WEATHER, ADDRESS, LOCATION_X, LOCATION_Y, CONTENTS, MOOD, PICTURE) values(" +
+                "'"+ weatherIndex + "', " +
+                "'"+ address + "', " +
+                "'"+ "" + "', " +
+                "'"+ "" + "', " +
+                "'"+ contents + "', " +
+                "'"+ moodIndex + "', " +
+                "'"+ picturePath + "')";
+
+        Log.d(TAG, "sql : " + sql);
+        NoteDatabase database = NoteDatabase.getInstance(context);
+        database.execSQL(sql);
 
     }
+
+    /**
+     * 데이터베이스 레코드 수정
+     */
+    private void modifyNote() {
+        if (item != null) {
+            String address = locationTextView.getText().toString();
+            String contents = contentsInput.getText().toString();
+
+            String picturePath = savePicture();
+
+            // update note
+            String sql = "update " + NoteDatabase.TABLE_NOTE +
+                    " set " +
+                    "   WEATHER = '" + weatherIndex + "'" +
+                    "   ,ADDRESS = '" + address + "'" +
+                    "   ,LOCATION_X = '" + "" + "'" +
+                    "   ,LOCATION_Y = '" + "" + "'" +
+                    "   ,CONTENTS = '" + contents + "'" +
+                    "   ,MOOD = '" + moodIndex + "'" +
+                    "   ,PICTURE = '" + picturePath + "'" +
+                    " where " +
+                    "   _id = " + item._id;
+
+            Log.d(TAG, "sql : " + sql);
+            NoteDatabase database = NoteDatabase.getInstance(context);
+            database.execSQL(sql);
+        }
+    }
+
+
+    /**
+     * 레코드 삭제
+     */
+    private void deleteNote() {
+        AppConstants.println("deleteNote called.");
+
+        if (item != null) {
+            // delete note
+            String sql = "delete from " + NoteDatabase.TABLE_NOTE +
+                    " where " +
+                    "   _id = " + item._id;
+
+            Log.d(TAG, "sql : " + sql);
+            NoteDatabase database = NoteDatabase.getInstance(context);
+            database.execSQL(sql);
+        }
+    }
+
+
 }
 
 

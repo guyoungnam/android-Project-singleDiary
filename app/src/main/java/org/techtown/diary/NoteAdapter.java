@@ -14,12 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> implements OnNoteItemClickListner { //에러
+public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> implements OnNoteItemClickListener  { //에러
 
 
 ArrayList<Note> items = new ArrayList<Note>();
 
-    OnNoteItemClickListner listener;
+    OnNoteItemClickListener listener;
 
     int layoutType=0;
 
@@ -59,7 +59,7 @@ ArrayList<Note> items = new ArrayList<Note>();
         return items.get(position);
     }
 
-    public void setOnItemClickListener(OnNoteItemClickListner listener) {
+    public void setOnItemClickListener(OnNoteItemClickListener listener) {
         this.listener = listener;
     }
 
@@ -138,7 +138,7 @@ ArrayList<Note> items = new ArrayList<Note>();
             int moodIndex = Integer.parseInt(mood);
             setMoodImage(moodIndex);
 
-            String picturePath = item.getPiture();
+            String picturePath = item.getPicture();
             if (picturePath != null && !picturePath.equals("")) {
                 pictureExistsImageView.setVisibility(View.VISIBLE);
                 pictureImageView.setVisibility(View.VISIBLE);
