@@ -71,8 +71,8 @@ public class Fragment3 extends Fragment {
                 "group by mood";
 
         Cursor cursor = database.rawQuery(sql);
-        int recordCount = cursor.getCount();
-        AppConstants.println("recordCount : " + recordCount);
+       int recordCount = cursor.getCount();
+       AppConstants.println("recordCount : " + recordCount);
 
         HashMap<String, Integer> dataHash1 = new HashMap<String, Integer>();
         for (int i = 0; i < recordCount; i++) {

@@ -57,7 +57,7 @@ public class Fragment1 extends Fragment {
         initUI(rootView);
 
         // 데이터 로딩
-        loadNoteListData();
+        //  loadNoteListData();
 
         return rootView;
     }
@@ -70,7 +70,7 @@ public class Fragment1 extends Fragment {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
-                 //   listener.onTabSelected(1);
+                    //   listener.onTabSelected(1);
                 }
             }
         });
@@ -118,7 +118,7 @@ public class Fragment1 extends Fragment {
     /**
      * 리스트 데이터 로딩
      */
-    public int loadNoteListData() {
+   /* public int loadNoteListData() {
         AppConstants.println("loadNoteListData called.");
 
         String sql = "select _id, WEATHER, ADDRESS, LOCATION_X, LOCATION_Y, CONTENTS, MOOD, PICTURE, CREATE_DATE, MODIFY_DATE from " + NoteDatabase.TABLE_NOTE + " order by CREATE_DATE desc";
@@ -169,10 +169,10 @@ public class Fragment1 extends Fragment {
             adapter.setItems(items);
             adapter.notifyDataSetChanged();
 
-        }
+        }*/
 
-        return recordCount;
+    //  return recordCount;
     }
 
 
-}
+

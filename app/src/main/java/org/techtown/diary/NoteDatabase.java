@@ -83,13 +83,7 @@ public class NoteDatabase {
         database = null;
     }
 
-    /**
-     * execute raw query using the input SQL
-     * close the cursor after fetching any result
-     *
-     * @param SQL
-     * @return
-     */
+
     public Cursor rawQuery(String SQL) {
         println("\nexecuteQuery called.\n");
 

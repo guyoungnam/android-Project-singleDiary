@@ -46,5 +46,7 @@ dependencies {
     implementation 'com.stanfy:gson-xml-java:0.1.7'
     implementation 'com.github.pedroSG94:AutoPermissions:1.0.3'
 
+    compile 'codelight.studios:android-smart-login:1.2'
+
 
 }
