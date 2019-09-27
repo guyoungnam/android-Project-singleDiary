@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "org.techtown.diary"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -17,7 +17,9 @@ android {
         }
     }
 
+
 }
+
 
 repositories {
     maven { url 'https://jitpack.io' }
@@ -46,7 +48,8 @@ dependencies {
     implementation 'com.stanfy:gson-xml-java:0.1.7'
     implementation 'com.github.pedroSG94:AutoPermissions:1.0.3'
 
-    compile 'codelight.studios:android-smart-login:1.2'
+    implementation 'codelight.studios:android-smart-login:1.2'
 
-
+    implementation 'com.google.firebase:firebase-core:17.2.0'
 }
+apply plugin: 'com.google.gms.google-services'

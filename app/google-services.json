@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "902138018615",
+    "firebase_url": "https://singledialy.firebaseio.com",
+    "project_id": "singledialy",
+    "storage_bucket": "singledialy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902138018615:android:d93de2dc1a8307c7aaf8b2",
+        "android_client_info": {
+          "package_name": "org.techtown.diary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "902138018615-ffr5t7k51beuu8b1qp7qd8f8ptrfnaju.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.techtown.diary",
+            "certificate_hash": "ee0836d3e8d05bbbcf484b71c3b434bdde99b596"
+          }
+        },
+        {
+          "client_id": "902138018615-t3trn4poa9n8mdjge75s22n8flavbih4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuEZ-qQi755A5GJHiXNs41ws76bQ9tpl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "902138018615-t3trn4poa9n8mdjge75s22n8flavbih4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

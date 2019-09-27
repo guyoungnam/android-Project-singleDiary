@@ -27,6 +27,7 @@ public class LoginActivity extends AppCompatActivity implements SmartLoginCallba
     private Button facebookLoginButton, googleLoginButton, customSigninButton, customSignupButton, logoutButton;
     private EditText emailEditText, passwordEditText;
 
+
     SmartUser currentUser;
     SmartLoginConfig config;
     SmartLogin smartLogin;
@@ -124,7 +125,7 @@ public class LoginActivity extends AppCompatActivity implements SmartLoginCallba
 
     private void bindView(){
         facebookLoginButton = (Button) findViewById(R.id.facebook_login_button);
-        googleLoginButton = (Button) findViewById(R.id.google_login_button);
+      //  googleLoginButton = (Button) findViewById(R.id.google_login_button);
         customSigninButton = (Button) findViewById(R.id.custom_signin_button);
         customSignupButton = (Button) findViewById(R.id.custom_signup_button);
         emailEditText = (EditText) findViewById(R.id.email_edittext);
