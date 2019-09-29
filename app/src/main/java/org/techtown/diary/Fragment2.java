@@ -47,8 +47,8 @@ public class Fragment2 extends Fragment {
     EditText contentsInput; //메모글 입력
     ImageView pictureImageView;
 
-    boolean isPhotoCaptured;
-    boolean isPhotoFileSaved;
+    boolean isPhotoCaptured; //사진 캡쳐
+    boolean isPhotoFileSaved; // 사진 저장
     boolean isPhotoCanceled;
 
     int selectedPhotoMenu;
@@ -58,6 +58,7 @@ public class Fragment2 extends Fragment {
 
     int mMode = AppConstants.MODE_INSERT;
     int _id = -1;
+
     int weatherIndex = 0;
 
     RangeSliderView moodSlider;
@@ -90,7 +91,6 @@ public class Fragment2 extends Fragment {
         if (context != null) {
             context = null;
             listener = null;
-            requestListener = null;
         }
     }
 
@@ -98,17 +98,18 @@ public class Fragment2 extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         Toast.makeText(context, "onCreateView 호출",Toast.LENGTH_LONG).show();
+
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment2, container, false);
 
         initUI(rootView);
 
-        //check current location
 
+        //현재 위치
         if (requestListener != null) {
             requestListener.onRequest("getCurrentLocation");
         }
 
-        //applyItem();
+        applyItem();
 
         return rootView;
     }
@@ -183,8 +184,7 @@ public class Fragment2 extends Fragment {
 
         });
 
-
-
+        //슬라이
         RangeSliderView silderView = rootView.findViewById(R.id.sliderView);
         final RangeSliderView.OnSlideListener listener = new RangeSliderView.OnSlideListener() {
             @Override
@@ -197,6 +197,9 @@ public class Fragment2 extends Fragment {
         silderView.setInitialIndex(2);
 
     }
+
+    // 날씨 설정
+    // 문자열 데이터에 따라 제공 이미지
 
     public void setWeather(String data) {
         if (data != null) {
@@ -221,6 +224,9 @@ public class Fragment2 extends Fragment {
         }
 
     }
+
+    // 날씨 설정
+    // 인덱스 데이터에 따라 이미지 제공
 
     public void setWeatherIndex(int index) {
         if (index == 0) {
@@ -254,7 +260,7 @@ public class Fragment2 extends Fragment {
 
     public void setAddress(String data) {
         locationTextView.setText(data);
-        Log.i("myTag",data);
+
     }
 
     //현재 일자
@@ -265,6 +271,8 @@ public class Fragment2 extends Fragment {
     public void setContents(String data) {
         contentsInput.setText(data);
     }
+
+    //비트맵팩토리 객체 이용
 
     public void setPicture(String picturePath, int sampleSize) {
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -323,6 +331,10 @@ public class Fragment2 extends Fragment {
 
     }
 
+
+    //AlertDialog 이용
+    //화면 누르면 사진찍기, 앨범에서 선택하기 메뉴 나오기
+
     public void showDialog(int id){
         AlertDialog.Builder builder = null;
 
@@ -346,7 +358,7 @@ public class Fragment2 extends Fragment {
                         if (selectedPhotoMenu == 0) {
                             showPhotoCaptureActivity();
                         } else if (selectedPhotoMenu == 1) {
-                            showPhotoCaptureActivity();
+                            showPhotoSelectionActivity();
                         }
                     }
                 });

@@ -87,15 +87,15 @@ public class NoteDatabase {
     public Cursor rawQuery(String SQL) {
         println("\nexecuteQuery called.\n");
 
-        Cursor c1 = null;
+        Cursor cursor = null;
         try {
-            c1 = db.rawQuery(SQL, null);
-            println("cursor count : " + c1.getCount());
+            cursor = db.rawQuery(SQL, null);
+            println("cursor count : " + cursor.getCount());
         } catch(Exception ex) {
             Log.e(TAG, "Exception in executeQuery", ex);
         }
 
-        return c1;
+        return cursor;
     }
 
     public boolean execSQL(String SQL) {
