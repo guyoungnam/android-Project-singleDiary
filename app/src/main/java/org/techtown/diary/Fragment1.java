@@ -56,8 +56,8 @@ public class Fragment1 extends Fragment {
 
         initUI(rootView);
 
-        // 데이터 로딩
-        //  loadNoteListData();
+        loadNoteListData();
+
 
         return rootView;
     }
@@ -94,9 +94,9 @@ public class Fragment1 extends Fragment {
 
         adapter = new NoteAdapter();
 
-        adapter.addItem(new Note(0, "0", "강남구 삼성동", "", "","오늘 너무 행복해!", "0", "capture1.jpg", "2월 10일"));
-        adapter.addItem(new Note(1, "1", "강남구 삼성동", "", "","친구와 재미있게 놀았어", "0", "capture1.jpg", "2월 11일"));
-        adapter.addItem(new Note(2, "0", "강남구 역삼동", "", "","집에 왔는데 너무 피곤해 ㅠㅠ", "0", null, "2월 13일"));
+        adapter.addItem(new Note(0, "0", "강남구 삼성동", "", "", "오늘 너무 행복해!", "0", "capture1.jpg", "2월 10일"));
+        adapter.addItem(new Note(1, "1", "강남구 삼성동", "", "", "친구와 재미있게 놀았어", "0", "capture1.jpg", "2월 11일"));
+        adapter.addItem(new Note(2, "0", "강남구 역삼동", "", "", "집에 왔는데 너무 피곤해 ㅠㅠ", "0", null, "2월 13일"));
 
         recyclerView.setAdapter(adapter);
 
@@ -115,10 +115,8 @@ public class Fragment1 extends Fragment {
 
     }
 
-    /**
-     * 리스트 데이터 로딩
-     */
-   /* public int loadNoteListData() {
+   // 리스트 데이터 로딩
+    public int loadNoteListData() {
         AppConstants.println("loadNoteListData called.");
 
         String sql = "select _id, WEATHER, ADDRESS, LOCATION_X, LOCATION_Y, CONTENTS, MOOD, PICTURE, CREATE_DATE, MODIFY_DATE from " + NoteDatabase.TABLE_NOTE + " order by CREATE_DATE desc";
@@ -145,12 +143,13 @@ public class Fragment1 extends Fragment {
                 String mood = outCursor.getString(6);
                 String picture = outCursor.getString(7);
                 String dateStr = outCursor.getString(8);
+
                 String createDateStr = null;
                 if (dateStr != null && dateStr.length() > 10) {
                     try {
                         Date inDate = AppConstants.dateFormat4.parse(dateStr);
                         createDateStr = AppConstants.dateFormat3.format(inDate);
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 } else {
@@ -169,10 +168,13 @@ public class Fragment1 extends Fragment {
             adapter.setItems(items);
             adapter.notifyDataSetChanged();
 
-        }*/
-
-    //  return recordCount;
+        }
+        return recordCount;
     }
+}
+
+
+
 
 
 

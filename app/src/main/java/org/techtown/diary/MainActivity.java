@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements OnTabItemSelected
 
 
     int locationCount = 0;
-    //위치를 한 번 확인한 후에는 위치 요청을 취소할 수 있도록 위치 젖ㅇ보를 확인하는 횟수
+    //위치를 한 번 확인한 후에는 위치 요청을 취소할 수 있도록 위치 정보를 확인하는 횟수
 
     String currentWeather;
     String currentAddress;

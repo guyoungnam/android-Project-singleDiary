@@ -4,12 +4,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.nfc.Tag;
 import android.util.Log;
+
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 
 /**
  * 메모 데이터베이스
  */
-public class NoteDatabase {
+public class NoteDatabase<param> {
     private static final String TAG = "NoteDatabase";
 
     /**
@@ -84,7 +87,10 @@ public class NoteDatabase {
     }
 
 
+
+
     public Cursor rawQuery(String SQL) {
+        Log.e(TAG, "rawQuery 확인중>>>>" + SQL);
         println("\nexecuteQuery called.\n");
 
         Cursor cursor = null;
